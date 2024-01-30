@@ -1,0 +1,10 @@
+# VScode
+.vscode
+
+# build
+build
+
+# Executables
+*.exe
+*.out
+*.app
