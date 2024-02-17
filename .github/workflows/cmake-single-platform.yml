@@ -29,8 +29,11 @@ jobs:
         ref: develop
         path: pico-sdk
 
+    - name: Checkout pico-sdk submodules
+      working-directory: ${{github.workspace}}/pico-sdk
+      run: git submodule update --init
+
     - name: Configure CMake
-      shell: bash
       run: |
         mkdir build && cd build
         PICO_SDK_PATH=../pico-sdk  cmake .. -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
