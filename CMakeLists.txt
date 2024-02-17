@@ -12,16 +12,10 @@ pico_sdk_init()
 # Set CMake build type (Release, Debug, etc.)
 set(CMAKE_BUILD_TYPE Debug)
 
-# Add source files to the project
-# set(SOURCES src/main.cpp src/SparkFun_Qwiic_Relay.cpp)
-
-# Add header files to the project
-# set(HEADERS include/SparkFun_Qwiic_Relay.h)
-
 add_executable(${PROJECT_NAME} src/program.cpp)
 
 # Add pico_stdlib library which aggregates commonly used features
-target_link_libraries(${PROJECT_NAME} pico_stdlib hardware_gpio pico_cyw43_arch_none)
+target_link_libraries(${PROJECT_NAME} pico_stdlib hardware_gpio)
 
 # Enable extra outputs for the Pico SDK libraries
 pico_enable_stdio_usb(${PROJECT_NAME} 1)

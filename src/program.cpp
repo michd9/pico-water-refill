@@ -1,14 +1,14 @@
+#include <stdio.h>
 #include "pico/stdlib.h"
 #include "hardware/gpio.h"
 #include "pico/time.h"
-#include "pico/cyw43_arch.h"
 
 
 // Constants
 const uint8_t RELAY_PIN = 22;         // GPIO pin connected to the relay
 const uint8_t FLOAT_SWITCH_PIN = 14;  // GPIO pin connected to the float switch
 
-// State machine states
+// State machine
 enum State {
     INIT,
     NOT_FULL,
@@ -22,16 +22,14 @@ void closeTap();
 bool isTankFull();
 void enterState(State newState);
 void updateStateMachine();
-void blinkLED(uint32_t duration, uint32_t interval);
+void failLoop();
 
 // State machine variables
 State currentState = INIT;
 absolute_time_t failureStartTime;
 
 // Configuration
-const uint32_t FAILURE_TIMEOUT = 120000;       // Timeout in milliseconds for transitioning to the failure state
-const uint32_t LED_BLINK_DURATION = 5000;     // Duration in milliseconds for LED blinking
-const uint32_t LED_BLINK_INTERVAL = 1000;    // Interval in milliseconds between LED blinks
+const uint32_t FAILURE_TIMEOUT = 120000;     // Timeout for transitioning to the failure state [ms]
 
 int main() {
     stdio_init_all();
@@ -44,16 +42,6 @@ int main() {
     gpio_init(FLOAT_SWITCH_PIN);
     gpio_set_dir(FLOAT_SWITCH_PIN, GPIO_IN);
     gpio_pull_up(FLOAT_SWITCH_PIN);
-
-    bool cw_ok = false;
-
-    if (cyw43_arch_init()) {
-        printf("Wi-Fi init failed\n");
-        return -1;
-    } else {
-        cw_ok = true;
-        printf("Wi-Fi correctly working.");
-    }
 
     closeTap();  // Start with the tap closed
 
@@ -77,8 +65,9 @@ void closeTap() {
 }
 
 bool isTankFull() {
-    // Read the button state
+    // Read the sensor state
     bool switch_state = gpio_get(FLOAT_SWITCH_PIN); // Read the float switch state (0 = full, 1 = not full)
+    // Debug prints:
     // printf("Level state: %d\n", switch_state);
     // printf("Level state: %s\n", switch_state) ? "FULL" : "NOTFULL");
     return !switch_state;
@@ -102,7 +91,7 @@ void enterState(State newState) {
         case FAILURE:
             printf("Entered state: FAILURE\n");
             closeTap();
-            blinkLED(LED_BLINK_DURATION, LED_BLINK_INTERVAL);
+            failLoop();
             break;
     }
 }
@@ -136,13 +125,10 @@ void updateStateMachine() {
     }
 }
 
-void blinkLED(uint32_t duration, uint32_t interval) {
-    // absolute_time_t startTime = get_absolute_time();
+void failLoop() {
+    // Infinite loop in case of failure
     while (1){
         printf("FAILURE state\n");
-        // cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, 0);  // Turn on the LED
-        // sleep_ms(interval);
-        // cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, 1);  // Turn off the LED
-        sleep_ms(interval);
+        sleep_ms(5000);
     }
 }
